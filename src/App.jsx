@@ -1,0 +1,300 @@
+import { useEffect, useRef, useState } from "react";
+import "./App.css";
+
+function App() {
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
+  const [tracks, setTracks] = useState([]);
+  const [currentTrack, setCurrentTrack] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+
+  const audioRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const audio = audioRef.current;
+
+  // Load local music files
+  const handleFiles = (event) => {
+    const files = Array.from(event.target.files);
+
+    if (files.length === 0) return;
+
+    const newTracks = files.map((file) => ({
+      name: file.name,
+      url: URL.createObjectURL(file),
+    }));
+
+    setTracks(newTracks);
+    setCurrentTrack(0);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+  };
+
+  // Change the audio source when the current track changes
+  useEffect(() => {
+    if (!audioRef.current || tracks.length === 0) return;
+
+    audioRef.current.src = tracks[currentTrack].url;
+    audioRef.current.load();
+
+    setCurrentTime(0);
+    setDuration(0);
+
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {
+        setIsPlaying(false);
+      });
+    }
+  }, [currentTrack, tracks]);
+
+  // Play / pause
+  const togglePlay = () => {
+    if (!audioRef.current || tracks.length === 0) return;
+
+    if (audioRef.current.paused) {
+      audioRef.current.play();
+      setIsPlaying(true);
+    } else {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleShuffle = () => setIsShuffle((prev) => !prev);
+  const toggleRepeat = () => setIsRepeat((prev) => !prev);
+
+  // Previous track
+  const previousTrack = () => {
+    if (tracks.length === 0) return;
+
+    setCurrentTrack((previous) => {
+      if (previous === 0) {
+        return tracks.length - 1;
+      }
+
+      return previous - 1;
+    });
+
+    setIsPlaying(true);
+  };
+
+  // Next track
+  const playPrevious = () => {
+    if (tracks.length === 0) return;
+
+    if (isShuffle) {
+      const randomIndex = Math.floor(Math.random() * tracks.length);
+      setCurrentTrackIndex(randomIndex);
+    } else {
+      setCurrentTrackIndex((prevIndex) =>
+        prevIndex === 0 ? tracks.length - 1 : prevIndex - 1
+      );
+    }
+  };
+
+  const playNext = () => {
+    if (tracks.length === 0) return;
+
+    if (isRepeat) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+      return;
+    }
+
+    if (isShuffle) {
+      const randomIndex = Math.floor(Math.random() * tracks.length);
+      setCurrentTrackIndex(randomIndex);
+    } else {
+      setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % tracks.length);
+    }
+  };
+
+  // Update progress
+  const handleTimeUpdate = () => {
+    if (!audioRef.current) return;
+
+    setCurrentTime(audioRef.current.currentTime);
+  };
+
+  // Get duration after audio loads
+  const handleLoadedMetadata = () => {
+    if (!audioRef.current) return;
+
+    setDuration(audioRef.current.duration);
+  };
+
+  // Seek through the track
+  const handleSeek = (event) => {
+    const newTime = Number(event.target.value);
+
+    if (!audioRef.current) return;
+
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const handleVolumeChange = (event) => {
+    const newVolume = Number(event.target.value);
+
+    setVolume(newVolume);
+
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  };
+
+  // Automatically move to the next track when a song ends
+  const handleEnded = () => {
+    if (tracks.length === 0) return;
+
+    if (currentTrack < tracks.length - 1) {
+      setCurrentTrack((current) => current + 1);
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    }
+  };
+
+  // Format seconds into M:SS
+  const formatTime = (time) => {
+    if (!Number.isFinite(time)) return "0:00";
+
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="app">
+      <main className="player">
+        <h1>Music player</h1>
+
+        <input
+          ref={fileInputRef}
+          className="file-input"
+          type="file"
+          accept="audio/*"
+          multiple
+          onChange={handleFiles}
+        />
+
+        <button
+          className="load-button"
+          onClick={() => fileInputRef.current.click()}
+        >
+          Load files
+        </button>
+
+        {tracks.length === 0 ? (
+          <p className="no-tracks">No tracks loaded</p>
+        ) : (
+          <>
+            <div className="track-info">
+              <div className="track-name">
+                {tracks[currentTrack].name}
+              </div>
+
+              <div className="track-counter">
+                Track {currentTrack + 1} of {tracks.length}
+              </div>
+            </div>
+
+            <div className="time-display">
+              <span>{formatTime(currentTime)}</span>
+              <span>/</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+
+            <input
+              className="seek-bar"
+              type="range"
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              onChange={handleSeek}
+              disabled={!duration}
+            />
+
+            <div className="controls">
+              <button
+                className={`control-btn ${isShuffle ? 'active' : ''}`}
+                onClick={toggleShuffle}
+                disabled={tracks.length === 0}
+              >
+                🔀︎
+              </button>
+
+              <button
+                className="control-btn"
+                onClick={playPrevious}
+                disabled={tracks.length === 0}
+              >
+                ⏮
+              </button>
+
+              <button
+                className="play-button"
+                onClick={togglePlay}
+                disabled={tracks.length === 0}
+              >
+                {isPlaying ? "⏸" : "▶"}
+              </button>
+
+              <button
+                className="control-btn"
+                onClick={playNext}
+                disabled={tracks.length === 0}
+              >
+                ⏭
+              </button>
+
+              <button
+                className={`control-btn ${isRepeat ? 'active' : ''}`}
+                onClick={toggleRepeat}
+                disabled={tracks.length === 0}
+              >
+                🔁︎
+              </button>
+            </div>
+
+            <div className="volume-control">
+              <span className="volume-icon">🔊</span>
+
+              <input
+                className="volume-slider"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={handleVolumeChange}
+                aria-label="Volume"
+              />
+
+              <span className="volume-value">
+                {Math.round(volume * 100)}%
+              </span>
+            </div>
+          </>
+        )}
+
+        <audio
+          ref={audioRef}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={handleEnded}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+        />
+      </main>
+    </div>
+  );
+}
+
+export default App;
