@@ -14,8 +14,6 @@ function App() {
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const audio = audioRef.current;
-
   // Load local music files
   const handleFiles = (event) => {
     const files = Array.from(event.target.files);
@@ -51,7 +49,7 @@ function App() {
     }
   }, [currentTrack, tracks]);
 
-  // Play / pause
+  // Play / pause toggle
   const togglePlay = () => {
     if (!audioRef.current || tracks.length === 0) return;
 
@@ -68,49 +66,38 @@ function App() {
   const toggleRepeat = () => setIsRepeat((prev) => !prev);
 
   // Previous track
-  const previousTrack = () => {
-    if (tracks.length === 0) return;
-
-    setCurrentTrack((previous) => {
-      if (previous === 0) {
-        return tracks.length - 1;
-      }
-
-      return previous - 1;
-    });
-
-    setIsPlaying(true);
-  };
-
-  // Next track
   const playPrevious = () => {
     if (tracks.length === 0) return;
 
     if (isShuffle) {
       const randomIndex = Math.floor(Math.random() * tracks.length);
-      setCurrentTrackIndex(randomIndex);
+      setCurrentTrack(randomIndex);
     } else {
-      setCurrentTrackIndex((prevIndex) =>
+      setCurrentTrack((prevIndex) =>
         prevIndex === 0 ? tracks.length - 1 : prevIndex - 1
       );
     }
+    setIsPlaying(true);
   };
 
+  // Next track
   const playNext = () => {
     if (tracks.length === 0) return;
 
-    if (isRepeat) {
+    if (isRepeat && audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play();
+      setIsPlaying(true);
       return;
     }
 
     if (isShuffle) {
       const randomIndex = Math.floor(Math.random() * tracks.length);
-      setCurrentTrackIndex(randomIndex);
+      setCurrentTrack(randomIndex);
     } else {
-      setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % tracks.length);
+      setCurrentTrack((prevIndex) => (prevIndex + 1) % tracks.length);
     }
+    setIsPlaying(true);
   };
 
   // Update progress
@@ -151,12 +138,11 @@ function App() {
   const handleEnded = () => {
     if (tracks.length === 0) return;
 
-    if (currentTrack < tracks.length - 1) {
-      setCurrentTrack((current) => current + 1);
-      setIsPlaying(true);
+    if (isRepeat && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
     } else {
-      setIsPlaying(false);
-      setCurrentTime(0);
+      playNext();
     }
   };
 
@@ -196,9 +182,7 @@ function App() {
         ) : (
           <>
             <div className="track-info">
-              <div className="track-name">
-                {tracks[currentTrack].name}
-              </div>
+              <div className="track-name">{tracks[currentTrack].name}</div>
 
               <div className="track-counter">
                 Track {currentTrack + 1} of {tracks.length}
@@ -223,7 +207,7 @@ function App() {
 
             <div className="controls">
               <button
-                className={`control-btn ${isShuffle ? 'active' : ''}`}
+                className={`control-btn ${isShuffle ? "active" : ""}`}
                 onClick={toggleShuffle}
                 disabled={tracks.length === 0}
               >
@@ -255,7 +239,7 @@ function App() {
               </button>
 
               <button
-                className={`control-btn ${isRepeat ? 'active' : ''}`}
+                className={`control-btn ${isRepeat ? "active" : ""}`}
                 onClick={toggleRepeat}
                 disabled={tracks.length === 0}
               >
@@ -277,9 +261,7 @@ function App() {
                 aria-label="Volume"
               />
 
-              <span className="volume-value">
-                {Math.round(volume * 100)}%
-              </span>
+              <span className="volume-value">{Math.round(volume * 100)}%</span>
             </div>
           </>
         )}
