@@ -61,16 +61,18 @@ button {
 }
 
 .track-info {
-  margin-top: 25px;
+  margin: 36px 0 8px;
 }
 
 .track-name {
-  font-size: 18px;
-  font-weight: 500;
-  color: #f4f0fa;
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f5f3fa;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 2px 18px rgba(200, 167, 255, 0.2);
 }
 
 .track-counter {
@@ -186,9 +188,30 @@ audio {
   margin-top: 22px;
 }
 
-.volume-icon {
+span.volume-icon {
   font-size: 17px;
   opacity: 0.85;
+  display: none;
+}
+
+.mute-button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 5px;
+  background: #342b46;
+  color: #c8a7ff;
+  font-size: 17px;
+  transition: background 0.2s ease;
+}
+
+.mute-button:hover {
+  background: #413658;
+}
+
+.mute-button.active {
+  background: #5b3e96;
+  color: #ffffff;
 }
 
 .volume-slider {

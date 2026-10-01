@@ -9,12 +9,39 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(() => {
+    try {
+      const savedVolume = localStorage.getItem("music-player-volume");
+
+      if (savedVolume === null) return 1;
+
+      const parsedVolume = Number(savedVolume);
+      return Number.isFinite(parsedVolume) && parsedVolume >= 0 && parsedVolume <= 1
+        ? parsedVolume
+        : 1;
+    } catch {
+      return 1;
+    }
+  });
+  const [isMuted, setIsMuted] = useState(false);
 
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Load local music files
+  // Keep the audio element and the saved browser preference in sync.
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+
+    try {
+      localStorage.setItem("music-player-volume", String(volume));
+    } catch {
+      // Continue playing normally when browser storage is unavailable.
+    }
+  }, [volume]);
+
+  // Add local music files to the current playlist.
   const handleFiles = (event) => {
     const files = Array.from(event.target.files);
 
@@ -25,11 +52,10 @@ function App() {
       url: URL.createObjectURL(file),
     }));
 
-    setTracks(newTracks);
-    setCurrentTrack(0);
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
+    setTracks((currentTracks) => [...currentTracks, ...newTracks]);
+
+    // Clear the input so selecting the same file again can add another copy.
+    event.target.value = "";
   };
 
   // Change the audio source when the current track changes
@@ -131,7 +157,21 @@ function App() {
 
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
+
+      if (newVolume > 0 && audioRef.current.muted) {
+        audioRef.current.muted = false;
+        setIsMuted(false);
+      }
     }
+  };
+
+  // Mute or restore the current audio without changing the selected volume.
+  const toggleMute = () => {
+    if (!audioRef.current || tracks.length === 0) return;
+
+    const shouldMute = !audioRef.current.muted;
+    audioRef.current.muted = shouldMute;
+    setIsMuted(shouldMute);
   };
 
   // Automatically move to the next track when a song ends
@@ -249,6 +289,15 @@ function App() {
 
             <div className="volume-control">
               <span className="volume-icon">🔊</span>
+
+              <button
+                className={`mute-button volume-icon ${isMuted ? "active" : ""}`}
+                onClick={toggleMute}
+                aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+                aria-pressed={isMuted}
+              >
+                {isMuted ? "\u{1F507}" : "\u{1F50A}"}
+              </button>
 
               <input
                 className="volume-slider"

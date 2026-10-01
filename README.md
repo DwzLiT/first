@@ -4,11 +4,11 @@ A lightweight, client-side web music player built with **React** and **Vite**. L
 
 ## Features
 
-- **Local file loading**: select multiple audio files via a custom "Load files" button
+- **Local file loading**: select multiple audio files via a custom "Load files" button; newly selected files are appended to the current playlist
 - **Playback controls**: play/pause, previous, next, shuffle, and repeat (with active-state highlighting)
 - **Seek slider**: interactive progress bar with time displayed as `M:SS`
 - **Volume control**: custom-styled slider with a live percentage readout
-- **Track title display**: long titles are truncated cleanly with an ellipsis
+- **Track title display**: the active filename is shown prominently, with long names truncated cleanly with an ellipsis
 - **Dark theme**: minimalist UI built with plain CSS
 
 ## Tech Stack
@@ -59,7 +59,7 @@ npm run lint
 
 ## Usage
 
-1. Click **Load files** and choose one or more audio files from your computer.
+1. Click **Load files** and choose one or more audio files from your computer. Selecting more files later adds them to the end of the current playlist; it does not replace tracks already loaded.
 2. Press play, or use the previous/next buttons to move through the loaded tracks.
 3. Use the seek slider to jump within a song and the volume slider to adjust loudness.
 4. Toggle **Shuffle** or **Repeat** to change how playback advances.
@@ -99,16 +99,12 @@ music-player/
 
 ## Known Issues
 
-- [ ] **Previous/Next crash**: `playPrevious` and `playNext` call `setCurrentTrackIndex`, but the state setter is named `setCurrentTrack`, causing a runtime error.
-- [ ] **Auto-advance ignores modes**: `handleEnded` does not respect the shuffle and repeat flags when a song ends naturally.
-- [ ] **Memory leaks**: object URLs are not released with `URL.revokeObjectURL` when new files are loaded or the component unmounts.
+- [ ] **Memory leaks**: object URLs are not released with `URL.revokeObjectURL` when the component unmounts.
 
 ## Roadmap
 
 ### Phase 1: Core Reliability & Refactoring
 
-- [ ] Fix the state setter bug in `playPrevious` and `playNext`
-- [ ] Unify `handleEnded` logic with shuffle/repeat behavior
 - [ ] Revoke object URLs to prevent memory leaks on large playlists
 
 ### Phase 2: Quality of Life
