@@ -27,6 +27,13 @@ function App() {
 
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
+  const trackUrlsRef = useRef(new Set());
+
+  // Release every local file URL when the player unmounts.
+  useEffect(() => () => {
+    trackUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    trackUrlsRef.current.clear();
+  }, []);
 
   // Keep the audio element and the saved browser preference in sync.
   useEffect(() => {
@@ -51,6 +58,8 @@ function App() {
       name: file.name,
       url: URL.createObjectURL(file),
     }));
+
+    newTracks.forEach(({ url }) => trackUrlsRef.current.add(url));
 
     setTracks((currentTracks) => [...currentTracks, ...newTracks]);
 
@@ -176,14 +185,21 @@ function App() {
 
   // Automatically move to the next track when a song ends
   const handleEnded = () => {
-    if (tracks.length === 0) return;
+    if (!audioRef.current || tracks.length === 0) return;
 
-    if (isRepeat && audioRef.current) {
+    if (isRepeat) {
       audioRef.current.currentTime = 0;
-      audioRef.current.play();
-    } else {
-      playNext();
+      audioRef.current.play().catch(() => setIsPlaying(false));
+      return;
     }
+
+    if (isShuffle) {
+      const randomIndex = Math.floor(Math.random() * tracks.length);
+      setCurrentTrack(randomIndex);
+    } else {
+      setCurrentTrack((prevIndex) => (prevIndex + 1) % tracks.length);
+    }
+    setIsPlaying(true);
   };
 
   // Format seconds into M:SS

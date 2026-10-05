@@ -71,18 +71,18 @@ User Interface Features
 
 When working on this project, be aware of the following bug fixes needed in App.jsx:
 
-    Track Auto-Advance Logic (handleEnded): Currently ignores the isShuffle and isRepeat flags when a song ends naturally.
+    Track Auto-Advance Logic (handleEnded): Fixed to respect isRepeat and isShuffle when a song ends naturally.
 
-    Memory Leaks: URL.createObjectURL references are not revoked (URL.revokeObjectURL) when loading new files or unmounting.
+    Memory Leaks: Local object URLs are tracked and revoked when the player unmounts.
 
 6. Incremental Roadmap & Future Goals
 Phase 1: Core Reliability & Refactoring
 
     [ ] Fix state setter bug in playPrevious and playNext.
 
-    [ ] Unify handleEnded logic with shuffle/repeat behavior.
+    [x] Unify handleEnded logic with shuffle/repeat behavior.
 
-    [ ] Add URL object revocation to prevent memory leaks on large playlists.
+    [x] Add URL object revocation to prevent memory leaks on large playlists.
 
 Phase 2: Quality of Life (QoL) Improvements
 
@@ -95,3 +95,15 @@ Phase 2: Quality of Life (QoL) Improvements
     [ ] Keyboard Shortcuts: Spacebar (Play/Pause), Left/Right Arrows (Seek ±5s), Up/Down Arrows (Volume).
 
     [ ] Local Storage Persistence: Save recent volume level and last played index across browser sessions.
+
+7. Possible Future Small Updates
+
+    [ ] Avoid selecting the same track during a shuffle skip when multiple tracks are loaded.
+
+    [ ] Add descriptive aria-label values to playback, shuffle, repeat, and load buttons.
+
+    [ ] Handle audio.play() promise rejections consistently in playback controls.
+
+    [ ] Add a simple playlist view with click-to-play and remove-track controls.
+
+    [ ] Add drag-and-drop support for loading audio files.
