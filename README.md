@@ -179,3 +179,5 @@ Issues and pull requests are welcome. Please run `npm run lint` before submittin
 ## License
 
 Add your license of choice here (for example, MIT).
+
+Test for git
