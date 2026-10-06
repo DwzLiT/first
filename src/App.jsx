@@ -100,11 +100,13 @@ function App() {
     addFilesToPlaylist(event.dataTransfer.files);
   };
 
-  // Change the audio source when the current track changes
-  useEffect(() => {
-    if (!audioRef.current || tracks.length === 0) return;
+  // Change the audio source only when the actual song changes
+  const currentUrl = tracks[currentTrack]?.url;
 
-    audioRef.current.src = tracks[currentTrack].url;
+  useEffect(() => {
+    if (!audioRef.current || !currentUrl) return;
+
+    audioRef.current.src = currentUrl;
     audioRef.current.load();
 
     setCurrentTime(0);
@@ -115,7 +117,8 @@ function App() {
         setIsPlaying(false);
       });
     }
-  }, [currentTrack, tracks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUrl]);
 
   // Play / pause toggle
   const togglePlay = () => {
@@ -166,6 +169,38 @@ function App() {
       setCurrentTrack((prevIndex) => (prevIndex + 1) % tracks.length);
     }
     setIsPlaying(true);
+  };
+
+  const removeTrack = (index) => {
+    const removed = tracks[index];
+    if (!removed) return;
+
+    URL.revokeObjectURL(removed.url);
+    trackUrlsRef.current.delete(removed.url);
+
+    const newTracks = tracks.filter((_, i) => i !== index);
+    setTracks(newTracks);
+
+    if (newTracks.length === 0) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.removeAttribute("src");
+        audioRef.current.load();
+      }
+      setIsPlaying(false);
+      setCurrentTrack(0);
+      setCurrentTime(0);
+      setDuration(0);
+      return;
+    }
+
+    if (index < currentTrack) {
+      // Removed a track above the current one: keep pointing at the same song
+      setCurrentTrack(currentTrack - 1);
+    } else if (index === currentTrack) {
+      // Removed the current song: the next one slides into this index (wrap at the end)
+      setCurrentTrack(index >= newTracks.length ? 0 : index);
+    }
   };
 
   // Update progress
@@ -391,7 +426,7 @@ function App() {
               {isPlaylistOpen && (
                 <ol className="playlist-tracks" id="playlist-tracks">
                   {tracks.map((track, index) => (
-                    <li key={track.url}>
+                    <li key={track.url} className="playlist-item">
                       <button
                         className={`playlist-track ${index === currentTrack ? "active" : ""}`}
                         type="button"
@@ -408,8 +443,16 @@ function App() {
                           <span className="playlist-now-playing">{isPlaying ? "Playing" : "Selected"}</span>
                         )}
                       </button>
-                    </li>
-                  ))}
+
+                      <button
+                        className="playlist-remove"
+                        type="button"
+                        onClick={() => removeTrack(index)}
+                        aria-label={`Remove ${track.name} from queue`}
+                      >
+                        ✕
+                      </button>
+                    </li>))}
                 </ol>
               )}
             </section>

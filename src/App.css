@@ -298,7 +298,8 @@ span.volume-icon {
 }
 
 .playlist-track {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -343,4 +344,27 @@ span.volume-icon {
 .playlist button:focus-visible {
   outline: 2px solid #c8a7ff;
   outline-offset: -2px;
+}
+
+.playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.playlist-remove {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #96919f;
+  font-size: 14px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.playlist-remove:hover {
+  background: #342b46;
+  color: #ff7a8a;
 }
