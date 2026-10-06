@@ -226,3 +226,96 @@ span.volume-icon {
   font-size: 14px;
   color: #96919f;
 }
+
+.playlist {
+  margin-top: 30px;
+  text-align: left;
+  border: 1px solid #342b46;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1b1923;
+}
+
+.playlist-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #292333;
+  color: #f5f3fa;
+  text-align: left;
+  font-size: 15px;
+}
+
+.playlist-toggle:hover {
+  background: #342b46;
+}
+
+.playlist-count {
+  color: #96919f;
+  font-size: 13px;
+}
+
+.playlist-chevron {
+  margin-left: auto;
+  color: #c8a7ff;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.playlist-tracks {
+  max-height: 260px;
+  overflow-y: auto;
+  list-style: none;
+  padding: 5px;
+  margin: 0;
+}
+
+.playlist-track {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 10px;
+  border-radius: 5px;
+  background: transparent;
+  color: #f5f3fa;
+  text-align: left;
+}
+
+.playlist-track:hover {
+  background: #292333;
+}
+
+.playlist-track.active {
+  background: #342b46;
+  color: #d7c2ff;
+}
+
+.playlist-track-number {
+  min-width: 22px;
+  color: #96919f;
+  text-align: center;
+  font-size: 13px;
+}
+
+.playlist-track-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.playlist-now-playing {
+  flex: none;
+  color: #c8a7ff;
+  font-size: 11px;
+}
+
+.playlist button:focus-visible {
+  outline: 2px solid #c8a7ff;
+  outline-offset: -2px;
+}

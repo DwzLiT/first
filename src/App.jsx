@@ -24,6 +24,7 @@ function App() {
     }
   });
   const [isMuted, setIsMuted] = useState(false);
+  const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
 
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -328,6 +329,47 @@ function App() {
 
               <span className="volume-value">{Math.round(volume * 100)}%</span>
             </div>
+
+            <section className="playlist" aria-label="Playlist">
+              <button
+                className="playlist-toggle"
+                type="button"
+                onClick={() => setIsPlaylistOpen((isOpen) => !isOpen)}
+                aria-expanded={isPlaylistOpen}
+                aria-controls="playlist-tracks"
+              >
+                <span>Queue</span>
+                <span className="playlist-count">{tracks.length} tracks</span>
+                <span className="playlist-chevron" aria-hidden="true">
+                  {isPlaylistOpen ? "−" : "+"}
+                </span>
+              </button>
+
+              {isPlaylistOpen && (
+                <ol className="playlist-tracks" id="playlist-tracks">
+                  {tracks.map((track, index) => (
+                    <li key={track.url}>
+                      <button
+                        className={`playlist-track ${index === currentTrack ? "active" : ""}`}
+                        type="button"
+                        onClick={() => {
+                          setCurrentTrack(index);
+                          setIsPlaying(true);
+                        }}
+                        aria-current={index === currentTrack ? "true" : undefined}
+                        aria-label={`Play ${track.name}`}
+                      >
+                        <span className="playlist-track-number">{index + 1}</span>
+                        <span className="playlist-track-name">{track.name}</span>
+                        {index === currentTrack && (
+                          <span className="playlist-now-playing">{isPlaying ? "Playing" : "Selected"}</span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
           </>
         )}
 

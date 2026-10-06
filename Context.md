@@ -78,7 +78,7 @@ When working on this project, be aware of the following bug fixes needed in App.
 6. Incremental Roadmap & Future Goals
 Phase 1: Core Reliability & Refactoring
 
-    [ ] Fix state setter bug in playPrevious and playNext.
+    [x] Fix state setter bug in playPrevious and playNext.
 
     [x] Unify handleEnded logic with shuffle/repeat behavior.
 
@@ -88,7 +88,7 @@ Phase 2: Quality of Life (QoL) Improvements
 
     [ ] ID3 Metadata Extraction: Integrate music-metadata-browser or jsmediatags to read embedded artist names, album titles, and embedded album art.
 
-    [ ] Playlist Drawer / Queue View: Display a collapsible list of loaded songs with active track highlights and click-to-play support.
+    [x] Playlist Drawer / Queue View: Display a collapsible list of loaded songs with active track highlights and click-to-play support.
 
     [ ] Drag & Drop: Allow dragging audio files directly into the browser window.
 
