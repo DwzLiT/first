@@ -25,6 +25,7 @@ function App() {
   });
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
 
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -49,9 +50,11 @@ function App() {
     }
   }, [volume]);
 
-  // Add local music files to the current playlist.
-  const handleFiles = (event) => {
-    const files = Array.from(event.target.files);
+  // Add audio files to the current playlist from the picker or a drop.
+  const addFilesToPlaylist = (fileList) => {
+    const files = Array.from(fileList).filter((file) =>
+      file.type.startsWith("audio/") || /\.(mp3|wav|ogg|oga|m4a|aac|flac|opus|wma)$/i.test(file.name)
+    );
 
     if (files.length === 0) return;
 
@@ -63,9 +66,38 @@ function App() {
     newTracks.forEach(({ url }) => trackUrlsRef.current.add(url));
 
     setTracks((currentTracks) => [...currentTracks, ...newTracks]);
+  };
+
+  const handleFiles = (event) => {
+    addFilesToPlaylist(event.target.files);
 
     // Clear the input so selecting the same file again can add another copy.
     event.target.value = "";
+  };
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    if (event.dataTransfer.types.includes("Files")) setIsDraggingFiles(true);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    if (event.dataTransfer.types.includes("Files")) {
+      event.dataTransfer.dropEffect = "copy";
+      setIsDraggingFiles(true);
+    }
+  };
+
+  const handleDragLeave = (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setIsDraggingFiles(false);
+    }
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDraggingFiles(false);
+    addFilesToPlaylist(event.dataTransfer.files);
   };
 
   // Change the audio source when the current track changes
@@ -214,7 +246,18 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div
+      className={`app ${isDraggingFiles ? "dragging-files" : ""}`}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDraggingFiles && (
+        <div className="drop-overlay" aria-live="polite">
+          <div className="drop-message">Drop audio files to add them to your queue</div>
+        </div>
+      )}
       <main className="player">
         <h1>Music player</h1>
 

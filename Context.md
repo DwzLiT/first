@@ -90,7 +90,7 @@ Phase 2: Quality of Life (QoL) Improvements
 
     [x] Playlist Drawer / Queue View: Display a collapsible list of loaded songs with active track highlights and click-to-play support.
 
-    [ ] Drag & Drop: Allow dragging audio files directly into the browser window.
+    [x] Drag & Drop: Allow dragging audio files directly into the browser window.
 
     [ ] Keyboard Shortcuts: Spacebar (Play/Pause), Left/Right Arrows (Seek ±5s), Up/Down Arrows (Volume).
 
